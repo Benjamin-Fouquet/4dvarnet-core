@@ -31,11 +31,11 @@ time_period = {
 
 params = {
     'files_cfg' : dict(
-                oi_path='/gpfsstore/rech/yrf/commun/NATL60/NATL/oi/ssh_NATL60_4nadir.nc',
+                oi_path='data/ssh_NATL60_swot_4nadir.nc',
                 oi_var='ssh_mod',
-                obs_mask_path='/gpfsstore/rech/yrf/commun/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc',
+                obs_mask_path='data/dataset_nadir_0d_swot.nc',
                 obs_mask_var='ssh_mod',
-                gt_path='/gpfsstore/rech/yrf/commun/NATL60/NATL/ref/NATL60-CJM165_NATL_ssh_y2013.1y.nc',
+                gt_path='data/NATL60-CJM165_GULFSTREAM_ssh_y2013.1y.nc',
                 gt_var='ssh',
         ),
     'test_dates': test_dates,

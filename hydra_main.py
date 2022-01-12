@@ -5,9 +5,13 @@ from main import FourDVarNetRunner
 from omegaconf import OmegaConf
 import hydra_config
 from pytorch_lightning import seed_everything
+import torch
+
+# path = 'dashboard/data/sample_batch_4dvarnet.torch'
+# data = torch.load(path)
 
 class FourDVarNetHydraRunner(FourDVarNetRunner):
-    def __init__(self, params, dm, lit_mod_cls):
+    def __init__(self, params, dm, lit_mod_cls, data):
         self.cfg = params
         self.filename_chkpt = self.cfg.ckpt_name
         self.dm = dm

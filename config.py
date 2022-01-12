@@ -1,6 +1,6 @@
 params = {
-    'data_dir'        : '/gpfsscratch/rech/nlu/commun/large',
-    'dir_save'        : '/gpfsscratch/rech/nlu/commun/large/results_maxime',
+    'data_dir'        : 'data',
+    'dir_save'        : 'results',
 
     'iter_update'     : [0, 20, 40, 60, 100, 150, 800],  # [0,2,4,6,9,15]
     'nb_grad_update'  : [15, 10, 10, 10, 15, 15, 20, 20, 20],#[5, 5, 10, 10, 15, 15, 20, 20, 20],  # [0,0,1,2,3,3]#[0,2,2,4,5,5]#
@@ -50,3 +50,8 @@ params = {
     'automatic_optimization' : True,
 
 }
+
+dim_range = 200
+slice_win = 5
+strides = 5
+time_period = 100

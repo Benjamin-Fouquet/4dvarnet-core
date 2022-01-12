@@ -9,9 +9,10 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
+            "justMyCode": true,
             "console": "integratedTerminal",
-            //"args": ["xp=my_xp", "entrypoint=test"]
-            "args": ["test"]
+            "args": ["xp=my_xp", "entrypoint=test"]
+            //"args": ["test"]
         }
     ]
 }

@@ -8,10 +8,18 @@ defaults:
   - /domain@datamodule.dim_range: qnatl
   - /training: calmap
   - _self_
-  # - /oi_4nadir: /gpfsstore/rech/yrf/commun/NATL60/NATL/oi/ssh_NATL60_4nadir.nc
+  # - /oi_4nadir: data/ssh_NATL60_swot_4nadir.nc
   # - /cal_data: /gpfswork/rech/yrf/commun/CalData/full_cal_obs.nc
   # - /noisy_swot: /gpfswork/rech/yrf/commun/CalData/cal_data_karin_noise_only.nc
   # - /natl_ssh: /gpfsstore/rech/yrf/commun/NATL60/NATL/ref/NATL60-CJM165_NATL_ssh_y2013.1y.nc
   # - /natl_sst: /gpfsdsstore/projects/rech/yrf/commun/NATL60/NATL/ref/NATL60-CJM165_NATL_sst_y2013.1y.nc
+
+
+                #   oi_path='data/ssh_NATL60_swot_4nadir.nc',
+                # oi_var='ssh_mod',
+                # obs_mask_path='data/dataset_nadir_0d_swot.nc',
+                # obs_mask_var='ssh_mod',
+                # gt_path='data/NATL60-CJM165_GULFSTREAM_ssh_y2013.1y.nc',
+                # gt_var='ssh',
 
 

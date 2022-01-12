@@ -20,6 +20,7 @@ class LegacyDataLoading(pl.LightningDataModule):
         self.training_dataset=None
         self.val_dataset=None
         self.test_dataset=None
+        self._has_setup_fit=None
 
 
     def setup(self, stage=None):

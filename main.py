@@ -22,7 +22,7 @@ class FourDVarNetRunner:
         from old_dataloading import LegacyDataLoading
         self.filename_chkpt = 'modelSLAInterpGF-Exp3-{epoch:02d}-{val_loss:.2f}'
         if config is None:
-            import config
+            import config_q.__init__ as config   #TODO: thats one ugly way of doing things, fix that
         else:
             import importlib
             print('loading config')
@@ -30,7 +30,10 @@ class FourDVarNetRunner:
 
         self.cfg = OmegaConf.create(config.params)
         print(OmegaConf.to_yaml(self.cfg))
-        dataloading = config.params['dataloading']
+        try:
+            dataloading = config.params['dataloading']
+        except KeyError:
+            print('KeyError: Continuing with legacy dataloading')
 
         dim_range = config.dim_range
         slice_win = config.slice_win
