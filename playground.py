@@ -77,17 +77,3 @@ class OSSE_CSED(Dataset):
 
 
 #dim_range = {'lat': slice(25.0, 65.0, None), 'lon': slice(-73.0, 7.0, None), 'time': slice('2012-10-01', ...20', None)}
-
-class Simple(pl.LightningModule):
-    def __init__(self):
-        return None
-
-    def forward(self, x):
-        return None
-
-    def loss(self, y_pred, y):
-        return None
-    def configure_optimizers(self):
-        return None
-    def training_step(self, batch, batch_idx):
-        return None
