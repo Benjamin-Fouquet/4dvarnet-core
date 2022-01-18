@@ -139,20 +139,7 @@ class FourDVarNetRunner:
                                                     )
 
         else:
-            mod = self.lit_cls(hparam=self.cfg, w_loss=self.wLoss,
-                               mean_Tr=self.mean_Tr, mean_Tt=self.mean_Tt, mean_Val=self.mean_Val,
-                               var_Tr=self.var_Tr, var_Tt=self.var_Tt, var_Val=self.var_Val,
-                               min_lon=self.min_lon, max_lon=self.max_lon,
-                               min_lat=self.min_lat, max_lat=self.max_lat,
-                               ds_size_time=self.ds_size_time,
-                               ds_size_lon=self.ds_size_lon,
-                               ds_size_lat=self.ds_size_lat,
-                               time=self.time,
-                               dX = self.dX, dY = self.dY,
-                               swX = self.swX, swY = self.swY,
-                               coord_ext = {'lon_ext': self.lon, 'lat_ext': self.lat},
-                               resolution=self.resolution,
-                               )
+            mod = self.lit_cls(hparam=self.cfg)
         return mod
 
     def train(self, ckpt_path=None, **trainer_kwargs):

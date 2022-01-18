@@ -9,16 +9,10 @@
             "type": "python",
             "request": "launch",
             "program": "${file}",
-<<<<<<< HEAD
             "justMyCode": true,
             "console": "integratedTerminal",
-            "args": ["xp=my_xp", "entrypoint=test"]
+            "args": ["xp=sla_gf_hal", "entrypoint=train", "file_paths=my_computer", "+entrypoint.gpus=0"]
             //"args": ["test"]
-=======
-            "console": "integratedTerminal",
-            //"args": ["xp=my_xp", "entrypoint=test"]
-            "args": ["test"]
->>>>>>> e43901136d0bc0f78c04dc15d552e81a56fed312
         }
     ]
 }

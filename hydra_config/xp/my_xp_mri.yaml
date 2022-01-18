@@ -1,0 +1,8 @@
+#@package _global_
+xp_name: my_xp_mri
+defaults: 
+  - /xp/sla_gf_hal
+  - _self_
+lit_mod_cls: lit_model_mri.LitModel
+datamodule:
+  _target_: mri_dataloading.MriDataModule

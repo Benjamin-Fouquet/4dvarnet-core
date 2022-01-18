@@ -4,10 +4,10 @@ from datetime import datetime, timedelta
 
 # Specify the dataset spatial bounds
 dim_range = {
-    #'lat': slice(33, 43),
-    #'lon': slice(-65, -55),
-    'lat': slice(27, 57),
-    'lon': slice(-77, 3),
+    'lat': slice(33, 43),
+    'lon': slice(-65, -55),
+    # 'lat': slice(27, 57),
+    # 'lon': slice(-77, 3),
 }
 # Specify the batch patch size
 slice_win = {

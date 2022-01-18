@@ -1,0 +1,8 @@
+oi_4nadir: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/oi/ssh_NATL60_4nadir.nc
+cal_data: /raid/localscratch/qfebvre/sla-data-registry/CalData/full_cal_obs.nc
+noisy_swot: /raid/localscratch/qfebvre/sla-data-registry/CalData/cal_data_karin_noise_only.nc
+natl_ssh: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+natl_sst: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+
+oi_swot_4nadir: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+pseudo_obs: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc

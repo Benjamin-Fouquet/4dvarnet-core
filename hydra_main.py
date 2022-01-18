@@ -9,7 +9,7 @@ from pytorch_lightning import seed_everything
 import numpy as np
 
 class FourDVarNetHydraRunner(FourDVarNetRunner):
-    def __init__(self, params, dm, lit_mod_cls, data):
+    def __init__(self, params, dm, lit_mod_cls):
         self.cfg = params
         self.filename_chkpt = self.cfg.ckpt_name
         self.dm = dm
@@ -21,14 +21,14 @@ class FourDVarNetHydraRunner(FourDVarNetRunner):
             'test': dm.test_dataloader(),
         }
 
-        test_dates = np.concatenate([ \
-                       [str(dt.date()) for dt in \
-                       pd.date_range(dm.test_slices[i].start,dm.test_slices[i].stop)[(self.cfg.dT//2):-(self.cfg.dT//2)]] \
-                      for i in range(len(dm.test_slices))])
+        # test_dates = np.concatenate([ \
+        #                [str(dt.date()) for dt in \
+        #                pd.date_range(dm.test_slices[i].start,dm.test_slices[i].stop)[(self.cfg.dT//2):-(self.cfg.dT//2)]] \
+        #               for i in range(len(dm.test_slices))])
         #print(test_dates)
-        self.time = {'time_test' : test_dates}
+        # self.time = {'time_test' : test_dates}
 
-        self.setup(dm)
+        # self.setup(dm)
 
 @hydra.main(config_path='hydra_config', config_name='main')
 def main(cfg):
