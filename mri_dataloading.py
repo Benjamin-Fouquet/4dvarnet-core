@@ -43,10 +43,10 @@ class MriDataset(Dataset):
         return len(self.subject_ds)
     def __getitem__(self, idx):
         subject_item = self.subject_ds[idx]
-        oi_item = kornia.gaussian_blur(subject_item['t2'])
-        obs_mask_item = subject_item['rn_mask']
-        obs_item = subject_item['rn_t2']
-        gt_item = subject_item['t2']
+        oi_item = kornia.filters.gaussian_blur2d(subject_item['t2'].data, kernel_size=(5, 5), sigma=(0.2, 0.2)).squeeze(0)[:5, :200, :200]
+        obs_mask_item = subject_item['rn_mask'].data.squeeze(0)[:5, :200, :200]
+        obs_item = subject_item['rn_t2'].data.squeeze(0)[:5, :200, :200]
+        gt_item = subject_item['t2'].data.squeeze(0)[:5, :200, :200]
         return oi_item, obs_mask_item, obs_item, gt_item
 
 

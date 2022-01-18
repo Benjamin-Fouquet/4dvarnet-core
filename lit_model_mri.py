@@ -9,12 +9,12 @@ class LitModel(pl.LightningModule):
 
         # main model
         self.model = NN_4DVar.Solver_Grad_4DVarNN(
-            Phi_r(self.shapeData[0], self.hparams.DimAE, self.hparams.dW, self.hparams.dW2, self.hparams.sS,
+            Phi_r(self.hparams.shapeData[0], self.hparams.DimAE, self.hparams.dW, self.hparams.dW2, self.hparams.sS,
                   self.hparams.nbBlocks, self.hparams.dropout_phi_r, self.hparams.stochastic),
-            Model_H(self.shapeData[0]),
-            NN_4DVar.model_GradUpdateLSTM(self.shapeData, self.hparams.UsePriodicBoundary,
+            Model_H(self.hparams.shapeData[0]),
+            NN_4DVar.model_GradUpdateLSTM(self.hparams.shapeData, self.hparams.UsePriodicBoundary,
                                           self.hparams.dim_grad_solver, self.hparams.dropout, self.hparams.stochastic),
-            None, None, self.shapeData, self.hparams.n_grad, self.hparams.stochastic)
+            None, None, self.hparams.shapeData, self.hparams.n_grad, self.hparams.stochastic)
 
         self.model_LR = ModelLR()
         self.gradient_img = Gradient_img()
@@ -71,7 +71,7 @@ class LitModel(pl.LightningModule):
         # self.log('train_mse', mse)
         # self.log("dev_loss", mse / var_Tr , on_step=True, on_epoch=True, prog_bar=True, sync_dist=True)
         self.log("loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=False)
-        self.log("tr_mse", metrics['mse'] / self.var_Tr, on_step=False, on_epoch=True, prog_bar=True, sync_dist=False)
+        self.log("tr_mse", metrics['mse'], on_step=False, on_epoch=True, prog_bar=True, sync_dist=False)
         self.log("tr_mseG", metrics['mseGrad'] / metrics['meanGrad'], on_step=False, on_epoch=True, prog_bar=True,
                  sync_dist=False)
 
@@ -95,7 +95,7 @@ class LitModel(pl.LightningModule):
         if loss is None:
             return loss
         self.log('val_loss', loss)
-        self.log("val_mse", metrics['mse'] / self.var_Val, on_step=False, on_epoch=True, prog_bar=True)
+        self.log("val_mse", metrics['mse'], on_step=False, on_epoch=True, prog_bar=True)
         self.log("val_mseG", metrics['mseGrad'] / metrics['meanGrad'], on_step=False, on_epoch=True, prog_bar=True)
         return loss.detach()
 
