@@ -3,6 +3,7 @@
 """
 Created on Mon May 18 17:59:23 2020
 @author: rfablet
+TODO: gpu management at init level, make it more flexible/parallelizable, see commented out
 """
 import os
 
@@ -14,7 +15,7 @@ from pytorch_lightning.callbacks import ModelCheckpoint
 
 
 class FourDVarNetRunner:
-    def __init__(self, dataloading="old", config=None):
+    def __init__(self, dataloading="old", config=None, gpu=2):
         from lit_model import LitModel
         from lit_model_sst import LitModelWithSST
         from lit_model_stochastic import LitModelStochastic
@@ -39,7 +40,7 @@ class FourDVarNetRunner:
         slice_win = config.slice_win
         strides = config.strides
         time_period = config.time_period
-
+        self.gpu = gpu
 
         if dataloading == "old":
             datamodule = LegacyDataLoading(self.cfg)
@@ -165,7 +166,7 @@ class FourDVarNetRunner:
         # accelerator = "ddp" if (num_gpus * num_nodes) > 1 else None
         # trainer = pl.Trainer(num_nodes=num_nodes, gpus=num_gpus, accelerator=accelerator, auto_select_gpus=(num_gpus * num_nodes) > 0,
         #                      callbacks=[checkpoint_callback, lr_monitor], **trainer_kwargs)
-        num_gpus = [2] if torch.cuda.is_available() == True else []
+        num_gpus = [self.gpu] if torch.cuda.is_available() == True else []
         trainer = pl.Trainer(gpus=num_gpus, callbacks=[checkpoint_callback, lr_monitor], **trainer_kwargs)
         trainer.fit(mod, self.dataloaders['train'], self.dataloaders['val'])
         return mod, trainer
@@ -180,9 +181,8 @@ class FourDVarNetRunner:
 
         mod = _mod or self._get_model(ckpt_path=ckpt_path)
 
-        num_gpus = torch.cuda.device_count()
-        # trainer = pl.Trainer(num_nodes=1, gpus=num_gpus, accelerator=None, **trainer_kwargs)
-        trainer = pl.Trainer(num_nodes=1, gpus=[2], accelerator=None, **trainer_kwargs)
+        num_gpus = [self.gpu] if torch.cuda.is_available() == True else []
+        trainer = pl.Trainer(num_nodes=1, gpus=num_gpus, accelerator=None, **trainer_kwargs)
         trainer.test(mod, test_dataloaders=self.dataloaders[dataloader])
 
     def profile(self):
