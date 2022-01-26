@@ -1,0 +1,9 @@
+oi_4nadir: /home/aorus-users/Benjamin/git_repos/sla-data-registry/NATL60/NATL/oi/ssh_NATL60_4nadir.nc
+cal_data: /raid/localscratch/qfebvre/sla-data-registry/CalData/full_cal_obs.nc
+noisy_swot: /raid/localscratch/qfebvre/sla-data-registry/CalData/cal_data_karin_noise_only.nc
+natl_ssh: /home/aorus-users/Benjamin/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+natl_sst: /home/aorus-users/Benjamin/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+
+oi_swot_4nadir: /home/aorus-users/Benjamin/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+pseudo_obs: /home/aorus-users/Benjamin/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+mri_path: /home/aorus-users/Benjamin/git_repos/4dvarnet-core/data/

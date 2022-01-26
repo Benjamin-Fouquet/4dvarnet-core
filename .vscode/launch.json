@@ -11,7 +11,7 @@
             "program": "${file}",
             "justMyCode": true,
             "console": "integratedTerminal",
-            "args": ["xp=sla_gf_hal", "entrypoint=train", "file_paths=my_computer", "+entrypoint.gpus=0"]
+            "args": ["xp=my_xp", "entrypoint=train", "file_paths=my_computer"]
             //"args": ["test"]
         }
     ]

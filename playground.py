@@ -1,79 +1,84 @@
-from new_dataloading import FourDVarNetDataModule
-import torch
-from hydra_main import FourDVarNetRunner
-import xarray as xr
-from torch.utils.data import Dataset
-from solver import Solver_Grad_4DVarNN
+import pandas as pd
+from mri_dataloading import MriDataModule
+from lit_model_mri import LitModel
 
-'''file path definition in jz'''
+mri_path = '/home/benjamin/Documents/Datasets/HCP/'
 
-path_torch = 'data/sample_batch_4dvarnet.torch'
-path_xarray = 'data/Dataset_64_ZOI.npy'
+test_dates = [str(dt.date()) for dt in pd.date_range('2013-01-03', "2013-01-27")]
 
-fake_config = {
-    'dim_range': ''
+params = {
+    'files_cfg' : dict(
+                oi_path='data/ssh_NATL60_swot_4nadir.nc',
+                oi_var='ssh_mod',
+                obs_mask_path='data/dataset_nadir_0d_swot.nc',
+                obs_mask_var='ssh_mod',
+                gt_path='data/NATL60-CJM165_GULFSTREAM_ssh_y2013.1y.nc',
+                gt_var='ssh',
+        ),
+    'test_dates': test_dates,
+    'dataloading': 'new',
+    'data_dir'        : '/gpfsscratch/rech/nlu/commun/large',
+    'dir_save'        : '/gpfsscratch/rech/nlu/commun/large/results_maxime',
+
+    'iter_update'     : [0, 20, 40, 60, 100, 150, 800],  # [0,2,4,6,9,15]
+    'nb_grad_update'  : [5, 5, 10, 10, 15, 15, 20, 20, 20],  # [0,0,1,2,3,3]#[0,2,2,4,5,5]#
+    'lr_update'       : [1e-3, 1e-4, 1e-3, 1e-4, 1e-4, 1e-5, 1e-5, 1e-6, 1e-7],
+    'k_batch'         : 1,
+    'n_grad'          : 5,
+    'dT'              : 5, ## Time window of each space-time patch
+    'dx'              : 1,   ## subsampling step if > 1
+    'W'               : 200, # width/height of each space-time patch
+    'resize_factor'   : 1,
+    'shapeData'       : [10, 200, 200],
+    'dW'              : 3,
+    'dW2'             : 1,
+    'sS'              : 4,  # int(4/dx),
+    'nbBlocks'        : 1,
+    'Nbpatches'       : 1, #10#10#25 ## number of patches extracted from each time-step 
+
+    # stochastic version
+    'stochastic'      : False,
+    'size_ensemble'   : 3,
+
+    # animation maps 
+    'animate'         : False,
+
+    # supervised/unsupervised loss
+    'supervised'      : True,
+
+    # use grad in state spate
+    #'grad_in_state'   : False,
+
+    # NN architectures and optimization parameters
+    'batch_size'      : 2, #16#4#4#8#12#8#256#
+    'DimAE'           : 25, #10#10#50
+    'dim_grad_solver' : 70,
+    'dropout'         : 0.25,
+    'dropout_phi_r'   : 0.,
+
+    'alpha_proj'      : 0.5,
+    'alpha_sr'        : 0.5,
+    'alpha_lr'        : 0.5,  # 1e4
+    'alpha_mse_ssh'   : 10.,
+    'alpha_mse_gssh'  : 1.,
+
+    # data generation
+    'sigNoise'        : 0.,## additive noise standard deviation
+    'flagSWOTData'    : True, #False ## use SWOT data or not
+    'Nbpatches'       : 1, #10#10#25 ## number of patches extracted from each time-step 
+    'rnd1'            : 0, ## random seed for patch extraction (space sam)
+    'rnd2'            : 100, ## random seed for patch extraction
+    'dwscale'         : 1,
+
+    'UsePriodicBoundary' : False,  # use a periodic boundary for all conv operators in the gradient model (see torch_4DVarNN_dinAE)
+    'InterpFlag'         : False, # True :> force reconstructed field to observed data after each gradient-based update
+    'flagSWOTData'       : True,
+    'automatic_optimization' : True,
 
 }
 
-
-data = torch.load(path_torch)
-
-dataloader = FourDVarNetDataModule(slice_win=5)
-
-runner = FourDVarNetRunner(config=fake_config)
-
-
-
-class OSSE_CSED(Dataset):
-
-    mean = -3.6109390258789062
-    std = 0.5700244903564453
-
-    def __init__(
-        self,
-        data_path=Path(".") / "data/Dataset_64_ZOI_daily.nc",
-        day_win=100,
-        overlap=0.8,
-        test=False,
-        return_clouds=False,
-    ):
-        self.data_path = data_path
-        self.day_win = day_win
-        self.day_win_step = int(day_win * (1 - overlap))
-        self.return_clouds = return_clouds
-
-        self.ds = xr.load_dataset(data_path)
-        self.mask = ~torch.tensor(self.ds["csed_daily"].isel(day=0).isnull().values).to(device=DEVICE)
-        self.ds["csed_daily"] = (self.ds["csed_daily"] - self.mean) / self.std
-
-        if test:
-            self.ds = self.ds.isel(day=slice(-100, None))
-        else:
-            self.ds = self.ds.isel(day=slice(None, -100))
-
-        ds = self.ds.fillna(0)
-        self.csed = torch.tensor(ds["csed_daily"].values).to(device=DEVICE)
-        self.cloud = torch.tensor(ds["cloud_daily"].values).to(device=DEVICE)
-
-        def rolling_window(tsr, size, step):
-            return tsr.unfold(0, size, step).moveaxis(-1, 1)
-
-        self.csed_rolling = rolling_window(self.csed, self.day_win, self.day_win_step).to(device=DEVICE)
-        self.cloud_rolling = rolling_window(self.cloud, self.day_win, self.day_win_step).to(device=DEVICE)
-
-    def __len__(self):
-        return len(self.csed_rolling)
-
-    def __getitem__(self, idx):
-        csed = self.csed_rolling[idx].unsqueeze(0)  # shape (C=1, D, H, W)
-        cloud = self.cloud_rolling[idx].unsqueeze(0)  # shape (C=1, D, H, W)
-
-        out = [csed * cloud, csed]
-
-        if self.return_clouds:
-            out.append(cloud)
-
-        return tuple(o.float() for o in out)
-
-
-#dim_range = {'lat': slice(25.0, 65.0, None), 'lon': slice(-73.0, 7.0, None), 'time': slice('2012-10-01', ...20', None)}
+dm = MriDataModule(mri_path)
+dm.setup()
+data = dm.get_dataset()
+model = LitModel(params)
+pred = model(data[0]) #does not work Maybe need to go through runner, but you will need to specify right model for that

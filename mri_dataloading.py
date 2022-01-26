@@ -13,103 +13,133 @@ from torch.utils.data import Dataset
 from new_dataloading import FourDVarNetDataset, FourDVarNetDataModule
 import kornia
 
+import matplotlib.pyplot as plt
+
+# grid_sampler = tio.inference.GridSampler(
+#     sub,
+#     patch_size,
+#     patch_overlap
+#     )
+
+#         output_tensor = aggregator.get_output_tensor()
+
+#         tmp = tio.ScalarImage(tensor=output_tensor, affine=sub.T1_image.affine)
+
+# patch_loader = torch.utils.data.DataLoader(grid_sampler, batch_size=batch_size)
+# aggregator = tio.inference.GridAggregator(sampler=grid_sampler, overlap_mode='average')
 
 
-# q_data = torch.load('data/sample_batch_4dvarnet.torch') #batch size = 2
+def tensor_visualisation(tensor):
+    """
+    Take a tensor and display a sample of it
+    """
+    assert torch.is_tensor(tensor), "Data provided is not a torch tensor"
+    tensor = tensor.detach().cpu()
+    # tensor = tensor.detach().numpy()
+    z, y, x = tensor.shape
+    fig, axes = plt.subplots(1, len(tensor))
+    for i, slice in enumerate(tensor):
+        axes[i].imshow(slice.T, origin="lower")  # cmap="gray"
+    plt.savefig("debug.png")
 
-# mri_path = '/home/benjamin/Documents/Datasets/HCP/'
 
-# percentage = 50
+def create_rn_mask(subject, percentage):
+    shape = subject.t2.shape
+    rn_mask = torch.FloatTensor(
+        np.random.choice(
+            [1, 0], size=shape, p=[(percentage * 0.01), 1 - ((percentage * 0.01))]
+        )
+    )
+    undersampling = rn_mask * subject.t2.data
+    subject.add_image(tio.LabelMap(tensor=rn_mask, affine=subject.t2.affine), "rn_mask")
+    subject.add_image(
+        tio.ScalarImage(tensor=undersampling, affine=subject.t2.affine), "rn_t2"
+    )
+    return None
 
-# num_workers = multiprocessing.cpu_count()
-
-# epochs = 200
-
-# device = [2] if torch.cuda.is_available() else []
-
-# subjects = []
-
-#  #only accept lists
-
-# dataloader = DataLoader(subjects_dataset, num_workers=num_workers)
-
-#tio SubjectsDataset superseed of torch.utils.dataset
-#dataloader is classical torch dataloader
 
 class MriDataset(Dataset):
-    def __init__(self, subject_ds):
+    def __init__(self, subject_ds, *args, **kwargs):
         self.subject_ds = subject_ds
+
     def __len__(self):
         return len(self.subject_ds)
+
     def __getitem__(self, idx):
         subject_item = self.subject_ds[idx]
-        oi_item = kornia.filters.gaussian_blur2d(subject_item['t2'].data, kernel_size=(5, 5), sigma=(0.2, 0.2)).squeeze(0)[:5, :200, :200]
-        obs_mask_item = subject_item['rn_mask'].data.squeeze(0)[:5, :200, :200]
-        obs_item = subject_item['rn_t2'].data.squeeze(0)[:5, :200, :200]
-        gt_item = subject_item['t2'].data.squeeze(0)[:5, :200, :200]
+        oi_item = kornia.filters.gaussian_blur2d(
+            subject_item["t2"].data, kernel_size=(5, 5), sigma=(0.2, 0.2)
+        ).squeeze(0)
+        obs_mask_item = subject_item["rn_mask"].data.squeeze(0)
+        obs_item = subject_item["rn_t2"].data.squeeze(0)
+        gt_item = subject_item["t2"].data.squeeze(0)
         return oi_item, obs_mask_item, obs_item, gt_item
 
 
 class MriDataModule(pl.LightningDataModule):
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        mri_path='/home/benjamin/Documents/Datasets/HCP/',
+        patch_size=(5, 200, 200),
+        patch_overlap=(0, 0, 0),
+        percentage=50,
+        *args,
+        **kwargs
+    ):
         super().__init__()
         self.train_ds = None
         self.val_ds = None
         self.test_ds = None
+        self.mri_path = mri_path
+        self.patch_size = patch_size
+        self.patch_overlap = patch_overlap
+        self.percentage = percentage
+
     def setup(self):
-        mri_path = '/home/benjamin/Documents/Datasets/HCP/'
-
-        percentage = 50
-
-        num_workers = multiprocessing.cpu_count()
-
-        epochs = 200
-
-        device = [2] if torch.cuda.is_available() else []
 
         subjects = []
         subject = tio.Subject(
-
-            t2=tio.ScalarImage(mri_path + '100307_T2.nii.gz'),
-
-            label=tio.LabelMap(mri_path + '100307_mask.nii.gz'),
+            t2=tio.ScalarImage(self.mri_path + "100307_T2.nii.gz"),
+            label=tio.LabelMap(self.mri_path + "100307_mask.nii.gz"),
         )
 
         transforms = [
-            #centré réduit
+            # centré réduit
             tio.RescaleIntensity(out_min_max=(0, 1)),
-
-            tio.RandomAffine(),
-
+            # tio.RandomAffine(),
         ]
-
-        def create_rn_mask(subject, percentage):
-            shape = subject.t2.shape
-            rn_mask = torch.FloatTensor(np.random.choice([1, 0], size=shape, p=[(percentage * 0.01), 1 - ((percentage * 0.01))]))
-            undersampling = rn_mask * subject.t2.data
-            subject.add_image(tio.LabelMap(tensor=rn_mask, affine=subject.t2.affine), 'rn_mask')
-            subject.add_image(tio.ScalarImage(tensor=undersampling, affine=subject.t2.affine), 'rn_t2')
-            return None
-
 
         subjects = [subject]
 
         for subject in subjects:
-            create_rn_mask(subject, percentage=percentage)
+            create_rn_mask(subject, percentage=self.percentage)
 
         transform = tio.Compose(transforms)
 
         subjects_dataset = tio.SubjectsDataset(subjects, transform=transform)
 
-        mri_dataset = MriDataset(subjects_dataset)
-        #later, split with random_split from torch
+        # TODO: later, split with random_split from torch, patch at this level
+        if self.patch_size == None:
+            mri_dataset = MriDataset(subjects_dataset)
+        else:
+            # create patch
+            grid_sampler = tio.inference.GridSampler(
+                subject, self.patch_size, self.patch_overlap
+            )
+            mri_dataset = MriDataset(grid_sampler)
+
         self.train_ds = mri_dataset
         self.val_ds = mri_dataset
-        self.test_ds = mri_dataset 
+        self.test_ds = mri_dataset
 
     def train_dataloader(self):
         return DataLoader(self.train_ds)
+
     def val_dataloader(self):
-        return DataLoader(self.val_ds) 
+        return DataLoader(self.val_ds)
+
     def test_dataloader(self):
-        return DataLoader(self.test_ds)  
+        return DataLoader(self.test_ds)
+
+    def get_dataset(self):
+        return self.train_ds

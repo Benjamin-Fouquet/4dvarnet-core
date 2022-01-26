@@ -7,6 +7,7 @@ from omegaconf import OmegaConf
 import hydra_config
 from pytorch_lightning import seed_everything
 import numpy as np
+import torch
 
 class FourDVarNetHydraRunner(FourDVarNetRunner):
     def __init__(self, params, dm, lit_mod_cls):
@@ -28,7 +29,12 @@ class FourDVarNetHydraRunner(FourDVarNetRunner):
         #print(test_dates)
         # self.time = {'time_test' : test_dates}
 
-        # self.setup(dm)
+        #self.setup(dm)
+
+        #part from self.setup()
+        w_ = np.zeros(self.cfg.dT)
+        w_[int(self.cfg.dT / 2)] = 1.
+        self.wLoss = torch.Tensor(w_)
 
 @hydra.main(config_path='hydra_config', config_name='main')
 def main(cfg):

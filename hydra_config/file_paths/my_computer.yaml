@@ -6,3 +6,4 @@ natl_sst: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_
 
 oi_swot_4nadir: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
 pseudo_obs: /home/benjamin/Documents/git_repos/sla-data-registry/NATL60/NATL/data_new/dataset_nadir_0d_swot.nc
+mri_path: /home/benjamin/Documents/Datasets/HCP/

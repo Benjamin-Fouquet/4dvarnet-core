@@ -22,7 +22,7 @@ class FourDVarNetRunner:
         from old_dataloading import LegacyDataLoading
         self.filename_chkpt = 'modelSLAInterpGF-Exp3-{epoch:02d}-{val_loss:.2f}'
         if config is None:
-            import config_q.__init__ as config   #TODO: thats one ugly way of doing things, fix that
+            import config_q.__init__ as config   
         else:
             import importlib
             print('loading config')
@@ -123,21 +123,21 @@ class FourDVarNetRunner:
         """
         print('get_model: ', ckpt_path)
         if ckpt_path:
-            mod = self.lit_cls.load_from_checkpoint(ckpt_path, w_loss=self.wLoss, strict=False,
-                                                    mean_Tr=self.mean_Tr, mean_Tt=self.mean_Tt, mean_Val=self.mean_Val,
-                                                    var_Tr=self.var_Tr, var_Tt=self.var_Tt, var_Val=self.var_Val,
-                                                    min_lon=self.min_lon, max_lon=self.max_lon,
-                                                    min_lat=self.min_lat, max_lat=self.max_lat,
-                                                    ds_size_time=self.ds_size_time,
-                                                    ds_size_lon=self.ds_size_lon,
-                                                    ds_size_lat=self.ds_size_lat,
-                                                    time=self.time,
-                                                    dX = self.dX, dY = self.dY,
-                                                    swX = self.swX, swY = self.swY,
-                                                    coord_ext = {'lon_ext': self.lon, 'lat_ext': self.lat},
-                                                    resolution=self.resolution,
-                                                    )
-
+            # mod = self.lit_cls.load_from_checkpoint(ckpt_path, w_loss=self.wLoss, strict=False,
+            #                                         mean_Tr=self.mean_Tr, mean_Tt=self.mean_Tt, mean_Val=self.mean_Val,
+            #                                         var_Tr=self.var_Tr, var_Tt=self.var_Tt, var_Val=self.var_Val,
+            #                                         min_lon=self.min_lon, max_lon=self.max_lon,
+            #                                         min_lat=self.min_lat, max_lat=self.max_lat,
+            #                                         ds_size_time=self.ds_size_time,
+            #                                         ds_size_lon=self.ds_size_lon,
+            #                                         ds_size_lat=self.ds_size_lat,
+            #                                         time=self.time,
+            #                                         dX = self.dX, dY = self.dY,
+            #                                         swX = self.swX, swY = self.swY,
+            #                                         coord_ext = {'lon_ext': self.lon, 'lat_ext': self.lat},
+            #                                         resolution=self.resolution,
+            #                                         )
+            mod = self.lit_cls.load_from_checkpoint(ckpt_path, w_loss=self.wLoss, strict=False)
         else:
             mod = self.lit_cls(hparam=self.cfg)
         return mod
@@ -176,7 +176,8 @@ class FourDVarNetRunner:
 
         mod = _mod or self._get_model(ckpt_path=ckpt_path)
 
-        trainer = pl.Trainer(num_nodes=1, gpus=1, accelerator=None, **trainer_kwargs)
+        num_gpus = torch.cuda.device_count()
+        trainer = pl.Trainer(num_nodes=1, gpus=num_gpus, accelerator=None, **trainer_kwargs)
         trainer.test(mod, test_dataloaders=self.dataloaders[dataloader])
 
     def profile(self):

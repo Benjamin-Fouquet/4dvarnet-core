@@ -1,5 +1,5 @@
 from models import *
-import xarray as xr
+from mri_dataloading import tensor_visualisation
 
 class LitModel(pl.LightningModule):
     def __init__(self, hparam, *args, **kwargs):
@@ -21,6 +21,7 @@ class LitModel(pl.LightningModule):
         # loss weghing wrt time
 
         self.w_loss = torch.nn.Parameter(torch.ones(5), requires_grad=False)  # duplicate for automatic upload to gpu
+        self.wLoss = torch.nn.Parameter(torch.ones(5), requires_grad=False)
         self.x_gt = None  # variable to store Ground Truth
         self.x_oi = None  # variable to store OI
         self.x_rec = None  # variable to store output of test method
@@ -41,7 +42,7 @@ class LitModel(pl.LightningModule):
         return optimizer
 
     def on_epoch_start(self):
-        # enfore acnd check some hyperparameters
+        # enforce and check some hyperparameters
         self.model.n_grad = self.hparams.n_grad
 
     def on_train_epoch_start(self):
@@ -98,6 +99,21 @@ class LitModel(pl.LightningModule):
         self.log("val_mse", metrics['mse'], on_step=False, on_epoch=True, prog_bar=True)
         self.log("val_mseG", metrics['mseGrad'] / metrics['meanGrad'], on_step=False, on_epoch=True, prog_bar=True)
         return loss.detach()
+
+    def test_step(self, test_batch, batch_idx):
+
+        targets_OI, inputs_Mask, inputs_obs, targets_GT = test_batch
+        loss, out, metrics = self.compute_loss(test_batch, phase='test')
+        tensor_visualisation(out.squeeze(0))
+        if loss is not None:
+            self.log('test_loss', loss)
+            self.log("test_mse", metrics['mse'], on_step=False, on_epoch=True, prog_bar=True)
+            self.log("test_mseG", metrics['mseGrad'] / metrics['meanGrad'], on_step=False, on_epoch=True, prog_bar=True)
+
+        # return {'gt'    : (targets_GT.detach().cpu()[:,:,(self.dY):(self.swY-self.dY),(self.dX):(self.swX-self.dX)]*np.sqrt(self.var_Tr)),
+        #         'obs'   : (inputs_obs.detach().cpu()[:,:,(self.dY):(self.swY-self.dY),(self.dX):(self.swX-self.dX)]*np.sqrt(self.var_Tr)),
+        #         'oi'    : (targets_OI.detach().cpu()[:,:,(self.dY):(self.swY-self.dY),(self.dX):(self.swX-self.dX)]*np.sqrt(self.var_Tr)),
+        #         'preds' : (out.detach().cpu()[:,:,(self.dY):(self.swY-self.dY),(self.dX):(self.swX-self.dX)]*np.sqrt(self.var_Tr))}
 
     def compute_loss(self, batch, phase):
 

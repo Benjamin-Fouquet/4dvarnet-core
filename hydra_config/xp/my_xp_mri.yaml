@@ -4,5 +4,25 @@ defaults:
   - /xp/sla_gf_hal
   - _self_
 lit_mod_cls: lit_model_mri.LitModel
+entrypoint:
+  ckpt_path: lightning_logs/version_13/checkpoints/modelSLAInterpGF-Exp3-epoch=04-val_loss=0.00.ckpt
 datamodule:
   _target_: mri_dataloading.MriDataModule
+  mri_path: ${file_paths.mri_path}
+  # patch_size: 5, 200, 200
+  # slice_win:
+  #   lat: 260
+  #   lon: 311
+  #   time: 260
+  # strides:
+  #   lat: 260
+  #   lon: 311
+  #   time: 100
+  slice_win:
+    lat: 200
+    lon: 200
+    time: 5
+  strides:
+    lat: 200
+    lon: 200
+    time: 1

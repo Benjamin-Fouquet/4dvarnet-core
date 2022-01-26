@@ -20,6 +20,7 @@ dependencies:
   - tabulate=0.8.9
   - xrft=0.3.0
   - numpy_groupies=0.9.13
+  - zarr
   - pip:
     - pytorch-lightning==1.4.9
     - omegaconf
@@ -29,3 +30,4 @@ dependencies:
     - hydra-core
     - kornia
     - pyepsg
+    - torchio
